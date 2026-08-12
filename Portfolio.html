@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hemamalini M — Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0A1228;
+    --surface: #0F1B3A;
+    --surface-2: #14234A;
+    --line: #253566;
+    --text: #EAF0FF;
+    --muted: #8C9BCB;
+    --muted-dim: #5A6899;
+    --signal: #F2B84B;      /* amber accent */
+    --signal-dim: #7A5C22;
+    --trace: #5B9CFF;       /* signal trace blue */
+    --trace-dim: #253566;
+    --danger: #E8734A;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family:'Manrope', sans-serif;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  ::selection{ background: var(--signal); color:#0C1614; }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+
+  a{ color: inherit; text-decoration:none; }
+
+  /* background circuit texture */
+  .pcb-bg{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    opacity:.08;
+  }
+
+  .wrap{ position:relative; z-index:1; max-width:920px; margin:0 auto; padding:0 28px; }
+
+  /* Signal rail - vertical trace connecting sections */
+  .rail{
+    position:fixed; top:0; bottom:0; left:calc(50% - 460px - 46px);
+    width:2px; z-index:1;
+  }
+  .rail-line{
+    position:absolute; left:0; top:0; width:2px; height:100%;
+    background: var(--trace-dim);
+  }
+  .rail-fill{
+    position:absolute; left:0; top:0; width:2px; height:0%;
+    background: var(--trace);
+    box-shadow: 0 0 8px var(--trace);
+    transition: height .1s linear;
+  }
+  @media (max-width: 980px){ .rail{ display:none; } }
+
+  .node{
+    position:absolute; left:-5px; width:12px; height:12px; border-radius:50%;
+    background: var(--bg); border:2px solid var(--trace-dim);
+    transition: border-color .3s, box-shadow .3s;
+  }
+  .node.active{ border-color: var(--trace); box-shadow:0 0 10px var(--trace); background: var(--trace); }
+
+  header.hero{
+    min-height:100vh; display:flex; flex-direction:column; justify-content:center;
+    padding-top:80px; padding-bottom:80px; position:relative;
+  }
+  .eyebrow{
+    color: var(--signal); letter-spacing:.14em; text-transform:uppercase;
+    font-size:12.5px; margin-bottom:22px; display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow .dot{
+    width:7px; height:7px; border-radius:50%; background: var(--signal);
+    box-shadow:0 0 8px var(--signal);
+    animation: blink 2.2s ease-in-out infinite;
+  }
+  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
+
+  .hero h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-style:normal;
+    font-size: clamp(38px, 7vw, 74px);
+    line-height:1.08;
+    letter-spacing:-.01em;
+    max-width: 780px;
+  }
+  .hero h1 .hl{ color: var(--signal); }
+  .hero .role{
+    margin-top:22px; font-size: clamp(17px, 2.4vw, 21px); color: var(--muted);
+    max-width:600px; font-weight:500;
+  }
+  .hero .objective{
+    margin-top:28px; max-width:600px; color: var(--muted); font-size:15.5px;
+  }
+
+  .contact-row{
+    margin-top:40px; display:flex; flex-wrap:wrap; gap:14px;
+  }
+  .chip{
+    font-family:'JetBrains Mono', monospace; font-size:13px;
+    border:1px solid var(--line); padding:9px 16px; border-radius:3px;
+    color: var(--text); display:flex; align-items:center; gap:8px;
+    transition: border-color .2s, background .2s;
+  }
+  .chip:hover{ border-color: var(--trace); background: var(--surface); }
+  .chip .k{ color: var(--muted-dim); }
+
+  section{ padding: 90px 0; border-top:1px solid var(--line); position:relative; }
+  header.hero{ border-top:none; }
+
+  .sec-head{ display:flex; align-items:baseline; gap:16px; margin-bottom:44px; }
+  .sec-num{ font-family:'JetBrains Mono', monospace; color: var(--signal-dim); font-size:14px; }
+  .sec-title{
+    font-family:'Fraunces', serif; font-weight:600;
+    font-size: clamp(24px, 3.6vw, 32px); letter-spacing:-.005em;
+  }
+  .sec-sub{ color: var(--muted); font-size:14px; margin-top:-30px; margin-bottom:36px; max-width:520px; }
+
+  /* Education */
+  .edu-item{
+    display:grid; grid-template-columns: 130px 1fr; gap:24px;
+    padding:22px 0; border-bottom:1px solid var(--line);
+  }
+  .edu-item:last-child{ border-bottom:none; }
+  .edu-period{ font-family:'JetBrains Mono', monospace; font-size:13px; color: var(--muted-dim); }
+  .edu-title{ font-family:'Fraunces', serif; font-weight:600; font-size:18px; }
+  .edu-org{ color: var(--muted); font-size:14.5px; margin-top:4px; }
+  .edu-score{ display:inline-block; margin-top:10px; font-family:'JetBrains Mono', monospace; font-size:12.5px; color: var(--trace); background: rgba(111,207,151,.08); border:1px solid var(--trace-dim); padding:3px 10px; border-radius:2px; }
+
+  /* Skills */
+  .skill-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:20px; }
+  @media (max-width:700px){ .skill-grid{ grid-template-columns:1fr; } }
+  .skill-card{ background: var(--surface); border:1px solid var(--line); border-radius:4px; padding:22px; }
+  .skill-card h4{ font-family:'JetBrains Mono', monospace; font-size:12.5px; text-transform:uppercase; letter-spacing:.08em; color: var(--signal); margin-bottom:14px; }
+  .skill-card ul{ list-style:none; }
+  .skill-card li{ font-size:14.5px; color: var(--text); padding:5px 0; display:flex; align-items:center; gap:9px; }
+  .skill-card li::before{ content:''; width:5px; height:5px; background: var(--trace); border-radius:50%; flex-shrink:0; }
+
+  /* Experience + Project + Patent = signal cards */
+  .card{
+    background: var(--surface); border:1px solid var(--line); border-radius:4px;
+    padding:30px; margin-bottom:22px; position:relative; overflow:hidden;
+  }
+  .card::before{
+    content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background: var(--trace);
+  }
+  .card.amber::before{ background: var(--signal); }
+  .card-top{ display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:12px; }
+  .card-title{ font-family:'Fraunces', serif; font-weight:600; font-size:19px; }
+  .card-org{ color: var(--signal); font-size:14px; font-weight:600; margin-top:4px; }
+  .card-period{ font-family:'JetBrains Mono', monospace; font-size:12.5px; color: var(--muted-dim); white-space:nowrap; }
+  .card-body{ color: var(--muted); font-size:14.5px; margin-top:10px; }
+  .tag-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+  .tag{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color: var(--trace); border:1px solid var(--trace-dim); padding:3px 9px; border-radius:2px; }
+  .card-link{
+    display:inline-block; margin-top:18px; font-family:'JetBrains Mono', monospace; font-size:13px;
+    color: var(--signal); border-bottom:1px solid var(--signal-dim); padding-bottom:2px; transition: opacity .2s;
+  }
+  .card-link:hover{ opacity:.75; }
+
+  .patent-label{
+    display:inline-block; font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:.08em;
+    text-transform:uppercase; color: var(--bg); background: var(--signal); padding:3px 9px; border-radius:2px; margin-bottom:14px;
+  }
+
+  /* Certifications */
+  .cert-list{ display:flex; flex-direction:column; gap:0; }
+  .cert-item{
+    display:flex; justify-content:space-between; align-items:center; gap:16px;
+    padding:18px 0; border-bottom:1px solid var(--line);
+  }
+  .cert-item:last-child{ border-bottom:none; }
+  .cert-name{ font-size:15px; }
+  .cert-badge{ font-family:'JetBrains Mono', monospace; font-size:11px; color: var(--muted-dim); border:1px solid var(--line); padding:3px 9px; border-radius:2px; white-space:nowrap; }
+
+  /* Languages */
+  .lang-row{ display:flex; gap:40px; flex-wrap:wrap; }
+  .lang-item .name{ font-family:'JetBrains Mono', monospace; font-size:15px; margin-bottom:8px; }
+  .bar{ width:180px; height:5px; background: var(--surface-2); border-radius:3px; overflow:hidden; }
+  .bar-fill{ height:100%; background: var(--trace); border-radius:3px; }
+
+  /* Contact / footer */
+  footer{ padding:90px 0 60px; border-top:1px solid var(--line); text-align:center; }
+  footer h2{
+    font-family:'Fraunces', serif; font-weight:600; font-size: clamp(28px,5vw,44px);
+    margin-bottom:18px;
+  }
+  footer .sub{ color: var(--muted); margin-bottom:36px; }
+  .footer-links{ display:flex; justify-content:center; gap:16px; flex-wrap:wrap; margin-bottom:60px; }
+  .btn{
+    font-family:'JetBrains Mono', monospace; font-size:14px; padding:12px 22px; border-radius:3px;
+    border:1px solid var(--trace); color: var(--trace); transition: all .2s;
+  }
+  .btn:hover{ background: var(--trace); color: var(--bg); }
+  .btn.ghost{ border-color: var(--line); color: var(--muted); }
+  .btn.ghost:hover{ border-color: var(--signal); color: var(--signal); background:transparent; }
+  footer .fine{ font-size:12px; color: var(--muted-dim); font-family:'JetBrains Mono', monospace; }
+
+  .reveal{ opacity:0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.in{ opacity:1; transform:none; }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    .reveal{ opacity:1; transform:none; transition:none; }
+    .eyebrow .dot{ animation:none; }
+  }
+
+  a:focus-visible, .chip:focus-visible, .btn:focus-visible{
+    outline:2px solid var(--signal); outline-offset:3px;
+  }
+</style>
+</head>
+<body>
+
+<div class="pcb-bg"></div>
+<div class="rail">
+  <div class="rail-line"></div>
+  <div class="rail-fill" id="railFill"></div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero" id="s-hero">
+    <div class="eyebrow"><span class="dot"></span> AVAILABLE FOR OPPORTUNITIES — COIMBATORE, TN</div>
+    <h1>Hemamalini M<br><span class="hl">from signal</span> to software.</h1>
+    <p class="role">Electronics &amp; Communication Engineering student building toward software development — where circuits taught precision, and code lets her build faster.</p>
+    <p class="objective">Career objective: to leverage a foundation in Electronics and Communication Engineering along with programming and problem-solving skills to develop efficient software solutions, growing as a developer by learning emerging technologies and contributing effectively to organisational goals.</p>
+    <div class="contact-row">
+      <a class="chip" href="mailto:hemamanickam0405@gmail.com"><span class="k">mail</span> hemamanickam0405@gmail.com</a>
+      <a class="chip" href="tel:+919042507428"><span class="k">tel</span> +91 90425 07428</a>
+      <a class="chip" href="https://www.linkedin.com/in/hemamalini-manickam-002566379/" target="_blank" rel="noopener"><span class="k">in</span> LinkedIn</a>
+      <a class="chip" href="https://github.com/hemamanickam0405-stack" target="_blank" rel="noopener"><span class="k">gh</span> GitHub</a>
+    </div>
+  </header>
+
+  <section id="s-education">
+    <div class="sec-head"><h2 class="sec-title">Education</h2></div>
+    <div class="reveal">
+      <div class="edu-item">
+        <div class="edu-period">2023 — Present</div>
+        <div>
+          <div class="edu-title">B.E. Electronics &amp; Communication Engineering</div>
+          <div class="edu-org">V.S.B. College of Engineering Technical Campus, Coimbatore, Tamil Nadu</div>
+          <span class="edu-score">CGPA 8.11 (upto 6th semester)</span>
+        </div>
+      </div>
+      <div class="edu-item">
+        <div class="edu-period">Class XII</div>
+        <div>
+          <div class="edu-title">Higher Secondary</div>
+          <div class="edu-org">Government Hr. Sec. School</div>
+          <span class="edu-score">69.5%</span>
+        </div>
+      </div>
+      <div class="edu-item">
+        <div class="edu-period">Class X</div>
+        <div>
+          <div class="edu-title">Secondary School</div>
+          <div class="edu-org">Government Hr. Sec. School</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="s-skills">
+    <div class="sec-head"><h2 class="sec-title">Technical Skills</h2></div>
+    <div class="skill-grid reveal">
+      <div class="skill-card">
+        <h4>Languages</h4>
+        <ul><li>Java</li><li>HTML</li><li>SQL</li></ul>
+      </div>
+      <div class="skill-card">
+        <h4>Platforms &amp; Tools</h4>
+        <ul><li>Visual Studio Code</li><li>Git &amp; GitHub</li><li>Eclipse</li></ul>
+      </div>
+      <div class="skill-card">
+        <h4>Soft Skills</h4>
+        <ul><li>Communication</li><li>Adaptability</li><li>Team Collaboration</li><li>Creativity</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="s-experience">
+    <div class="sec-head"><h2 class="sec-title">Experience</h2></div>
+    <div class="reveal">
+      <div class="card">
+        <div class="card-top">
+          <div>
+            <div class="card-title">Frontend Developer Intern</div>
+            <div class="card-org">ProPlus Academy</div>
+          </div>
+          <div class="card-period">02 Jan 2026 — 20 Jan 2026</div>
+        </div>
+        <p class="card-body">Hands-on internship building responsive, interactive web applications using HTML, JavaScript, and React.js.</p>
+        <div class="tag-row"><span class="tag">HTML</span><span class="tag">JavaScript</span><span class="tag">React.js</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="s-projects">
+    <div class="sec-head"><h2 class="sec-title">Projects</h2></div>
+    <div class="reveal">
+      <div class="card">
+        <div class="card-top">
+          <div>
+            <div class="card-title">Fire and Smoke Detection System using Arduino</div>
+          </div>
+        </div>
+        <p class="card-body">Designed and built an Arduino-based hazard monitoring system using temperature and MQ2 gas sensors for real-time fire and smoke detection, with automatic buzzer-alarm activation for early warning and faster safety response.</p>
+        <div class="tag-row"><span class="tag">Arduino</span><span class="tag">MQ2 Sensor</span><span class="tag">Embedded Systems</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top">
+          <div>
+            <div class="card-title">Accident Detection &amp; Emergency Alert System using GPS Simulation</div>
+          </div>
+        </div>
+        <p class="card-body">A simulation-based system that detects accident scenarios and triggers automated emergency alerts with the affected location, using simulated GPS coordinates to demonstrate real-time tracking and rapid response for road-safety use cases.</p>
+        <div class="tag-row"><span class="tag">GPS Simulation</span><span class="tag">Emergency Alert</span><span class="tag">Safety Systems</span></div>
+        <a class="card-link" href="https://github.com/hemamanickam0405-stack/accident-alert-system" target="_blank" rel="noopener">View on GitHub →</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="s-patent">
+    <div class="sec-head"><h2 class="sec-title">Patent</h2></div>
+    <div class="reveal">
+      <div class="card amber">
+        <span class="patent-label">Patent</span>
+        <div class="card-title">Adaptive Multi-Stage Visibility Enhancement and Anomaly Detection System for Autonomous Traffic Surveillance in Degraded Environmental Conditions</div>
+        <p class="card-body">An adaptive multi-stage system that enhances visibility under poor conditions such as fog, rain, or low light to improve the clarity of traffic surveillance footage, while also detecting anomalies like accidents or unusual vehicle behaviour — enabling safer, more reliable autonomous traffic monitoring.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="s-certs">
+    <div class="sec-head"><h2 class="sec-title">Certifications</h2></div>
+    <div class="cert-list reveal">
+      <div class="cert-item">
+        <span class="cert-name">Principles of Modern CDMA / MIMO / OFDM Wireless Communication</span>
+        <span class="cert-badge">NPTEL · Elite</span>
+      </div>
+      <div class="cert-item">
+        <span class="cert-name">Internet of Things</span>
+        <span class="cert-badge">NPTEL · Elite</span>
+      </div>
+      <div class="cert-item">
+        <span class="cert-name">IoT Edge Computing and IoT Analytics</span>
+        <span class="cert-badge">Infosys</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="s-languages">
+    <div class="sec-head"><h2 class="sec-title">Languages</h2></div>
+    <div class="lang-row reveal">
+      <div class="lang-item">
+        <div class="name">Tamil — Native / Fluent</div>
+        <div class="bar"><div class="bar-fill" style="width:100%"></div></div>
+      </div>
+      <div class="lang-item">
+        <div class="name">English — Intermediate</div>
+        <div class="bar"><div class="bar-fill" style="width:65%"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <footer id="s-contact">
+    <h2>Let's build something.</h2>
+    <p class="sub">Open to frontend and software development roles — reach out anytime.</p>
+    <div class="footer-links">
+      <a class="btn" href="mailto:hemamanickam0405@gmail.com">Send an email</a>
+      <a class="btn ghost" href="tel:+919042507428">Call +91 90425 07428</a>
+      <a class="btn ghost" href="https://www.linkedin.com/in/hemamalini-manickam-002566379/" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="btn ghost" href="https://github.com/hemamanickam0405-stack" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <p class="fine">© 2026 Hemamalini M · Coimbatore, Tamil Nadu</p>
+  </footer>
+
+</div>
+
+<script>
+  // scroll progress on rail
+  const railFill = document.getElementById('railFill');
+  function updateRail(){
+    const h = document.documentElement;
+    const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    if(railFill) railFill.style.height = Math.min(100, Math.max(0, scrolled)) + '%';
+  }
+  document.addEventListener('scroll', updateRail);
+  updateRail();
+
+  // reveal on scroll
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); } });
+  }, { threshold: 0.15 });
+  reveals.forEach(r=>io.observe(r));
+</script>
+
+</body>
+</html>
